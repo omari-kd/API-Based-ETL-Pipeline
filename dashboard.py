@@ -3,11 +3,25 @@ import pandas as pd
 import psycopg2
 
 # PostgreSQL Connection details
+# try:
+#     conn = psycopg2.connect(**st.secrets["postgres"])
+# except Exception as e:
+#     st.error(f"Connection failed: {e}")
+#     st.stop()
 try:
-    conn = psycopg2.connect(**st.secrets["postgres"])
+    conn = psycopg2.connect(
+        host=st.secrets["postgres"]["host"],
+        database=st.secrets["postgres"]["database"],
+        user=st.secrets["postgres"]["user"],
+        password=st.secrets["postgres"]["password"],
+        port=st.secrets["postgres"]["port"],
+        sslmode=st.secrets["postgres"]["sslmode"]
+    )
+    st.success("Connected to Neon PostgreSQL successfully!")
 except Exception as e:
     st.error(f"Connection failed: {e}")
     st.stop()
+
 
 
 st.set_page_config(page_title="Data Warehouse Dashboard", layout="wide")
