@@ -2,7 +2,27 @@ import streamlit as st
 import pandas as pd
 import psycopg2
 
-# --- Connect to Neon PostgreSQL using Streamlit secrets ---
+# PostgreSQL Connection details
+# try:
+#     conn = psycopg2.connect(**st.secrets["postgres"])
+# except Exception as e:
+#     st.error(f"Connection failed: {e}")
+#     st.stop()
+# try:
+#     conn = psycopg2.connect(
+#         host=st.secrets["postgres"]["host"],
+#         database=st.secrets["postgres"]["database"],
+#         user=st.secrets["postgres"]["user"],
+#         password=st.secrets["postgres"]["password"],
+#         port=st.secrets["postgres"]["port"],
+#         sslmode=st.secrets["postgres"]["sslmode"]
+#     )
+#     st.success("Connected to Neon PostgreSQL successfully!")
+# except Exception as e:
+#     st.error(f"Connection failed: {e}")
+#     st.stop()
+
+# conn = psycopg2.connect(**st.secrets["postgres"])
 conn = psycopg2.connect(**st.secrets["postgres"])
 cur = conn.cursor()
 
@@ -14,11 +34,14 @@ st.set_page_config(page_title="Data Warehouse Dashboard", layout="wide")
 st.title('ETL Data Warehouse Dashboard')
 
 # --- Load data from warehouse ---
-query = "SELECT * FROM warehouse.products;"
+# Query data from fact_sales table (or whatever you have)
+cur.execute("SELECT table_schema, table_name FROM information_schema.tables;")
+# tables = cur.fetchall()
+# st.write("Available tables:", tables)
+
+query = query = "SELECT * FROM public.products;"
 df = pd.read_sql(query, conn)
 
-
-# --- Preview ---
 st.subheader("Sales Data Preview")
 st.dataframe(df)
 
@@ -33,11 +56,11 @@ col4.metric("Average Rating", f"{df['rating_score'].mean():.2f}")
 # --- Charts ---
 st.subheader("Visualisations")
 
-# Category-wise average price
+# Category-wise average
 avg_by_category = df.groupby("category_name")["unit_price"].mean().reset_index()
 st.bar_chart(avg_by_category, x="category_name", y="unit_price")
 
-# Rating distribution per product
+# Rating distribution
 rating_chart = df.groupby("product_name")["rating_score"].mean().reset_index()
 st.line_chart(rating_chart, x="product_name", y="rating_score")
 
@@ -46,7 +69,7 @@ st.subheader("Top Rated Products")
 top_rated = df.sort_values("rating_score", ascending=False).head(5)
 st.table(top_rated[["product_name", "rating_score", "rating_count", "unit_price"]])
 
-# --- Sidebar filter ---
+# sidebar filter
 st.sidebar.header("Filters")
 selected_category = st.sidebar.selectbox("Select Category", ["All"] + list(df['category_name'].unique()))
 
@@ -56,5 +79,4 @@ if selected_category != "All":
 st.subheader(f"Filtered Data — {selected_category}")
 st.dataframe(df)
 
-# --- Close connection ---
 conn.close()
