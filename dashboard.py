@@ -22,6 +22,8 @@ import psycopg2
 #     st.error(f"Connection failed: {e}")
 #     st.stop()
 
+#  st.write(st.secrets)
+
 # conn = psycopg2.connect(**st.secrets["postgres"])
 conn = psycopg2.connect(**st.secrets["postgres"])
 cur = conn.cursor()
