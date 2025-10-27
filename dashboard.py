@@ -3,12 +3,11 @@ import pandas as pd
 import psycopg2
 
 # PostgreSQL Connection details
-conn = psycopg2.connect (
-    host='localhost',
-    database='etl_demo',
-    user='postgres',
-    password='ben/junior'
-)
+try:
+    conn = psycopg2.connect(**st.secrets["postgres"])
+except Exception as e:
+    st.error(f"Connection failed: {e}")
+    st.stop()
 
 
 st.set_page_config(page_title="Data Warehouse Dashboard", layout="wide")

@@ -3,3 +3,6 @@ venv/
 
 # Ignore archives folder
 archives/
+
+# Ignore streamlit credentials
+.streamlit/secrets.toml
